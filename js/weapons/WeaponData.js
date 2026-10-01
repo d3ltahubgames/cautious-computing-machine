@@ -1,0 +1,60 @@
+// WeaponData.js — stat sheet for every weapon in the game.
+window.TFPS = window.TFPS || {};
+
+TFPS.WeaponData = {
+  pistol: {
+    id: 'pistol', name: 'Sidearm', price: 0, slot: 1,
+    damageBody: 26, damageHead: 78,
+    fireRateMs: 260, isAuto: false,
+    magSize: 12, reserveMax: 36,
+    reloadMs: 1400,
+    spreadBase: 0.006, spreadMax: 0.045, spreadPerShot: 0.014, spreadRecoverPerSec: 0.09,
+    moveSpreadMult: 2.4, crouchSpreadMult: 0.6, adsSpreadMult: 0.7,
+    moveSpeedMult: 1.0,
+    muzzleColor: 0xfff2b0, tracerColor: 0xfff2b0,
+    range: 60,
+  },
+  smg: {
+    id: 'smg', name: 'Scrapper SMG', price: 950, slot: 2,
+    damageBody: 20, damageHead: 50,
+    fireRateMs: 95, isAuto: true,
+    magSize: 30, reserveMax: 90,
+    reloadMs: 2200,
+    spreadBase: 0.010, spreadMax: 0.09, spreadPerShot: 0.010, spreadRecoverPerSec: 0.12,
+    moveSpreadMult: 1.7, crouchSpreadMult: 0.65, adsSpreadMult: 0.75,
+    moveSpeedMult: 1.05,
+    muzzleColor: 0xffe27a, tracerColor: 0xffe27a,
+    range: 45,
+  },
+  rifle: {
+    id: 'rifle', name: 'Vulcan AR', price: 2900, slot: 3,
+    damageBody: 40, damageHead: 150,
+    fireRateMs: 145, isAuto: true,
+    magSize: 25, reserveMax: 90,
+    reloadMs: 2500,
+    spreadBase: 0.005, spreadMax: 0.075, spreadPerShot: 0.011, spreadRecoverPerSec: 0.10,
+    moveSpreadMult: 2.2, crouchSpreadMult: 0.55, adsSpreadMult: 0.6,
+    moveSpeedMult: 0.95,
+    muzzleColor: 0xffcf6b, tracerColor: 0xffcf6b,
+    range: 90,
+  },
+  sniper: {
+    id: 'sniper', name: 'Longbow', price: 4500, slot: 4,
+    damageBody: 145, damageHead: 260,
+    fireRateMs: 1150, isAuto: false,
+    magSize: 5, reserveMax: 25,
+    reloadMs: 3000,
+    spreadBase: 0.003, spreadMax: 0.05, spreadPerShot: 0.03, spreadRecoverPerSec: 0.25,
+    moveSpreadMult: 4.0, crouchSpreadMult: 0.5, adsSpreadMult: 0.03,
+    moveSpeedMult: 0.82, scoped: true, scopedFov: 22, scopedMoveMult: 0.4,
+    muzzleColor: 0xffffff, tracerColor: 0xffffff,
+    range: 140,
+  },
+
+  SHIELD_LIGHT: { price: 400, amount: 25 },
+  SHIELD_HEAVY: { price: 1000, amount: 50 },
+  ABILITY_PRICE: 200,
+  ABILITY_MAX_CHARGES: 2,
+
+  order: ['pistol', 'smg', 'rifle', 'sniper'],
+};

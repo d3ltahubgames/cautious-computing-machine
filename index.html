@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bastion Quarter — Tactical FPS</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="app-canvas"></canvas>
+
+<div id="hud">
+  <div id="crosshair">
+    <div class="ch-line" id="ch-top"></div>
+    <div class="ch-line" id="ch-bottom"></div>
+    <div class="ch-line" id="ch-left"></div>
+    <div class="ch-line" id="ch-right"></div>
+  </div>
+  <div id="hitmarker"></div>
+
+  <div id="health-panel">
+    <div class="bar-row">
+      <span class="bar-label">HP</span>
+      <div class="bar-track"><div class="bar-fill" id="health-fill" style="width:100%"></div></div>
+      <span class="bar-value" id="health-text">100</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">SH</span>
+      <div class="bar-track"><div class="bar-fill" id="shield-fill" style="width:0%"></div></div>
+      <span class="bar-value" id="shield-text">0</span>
+    </div>
+    <span id="credits-text">$800</span>
+  </div>
+
+  <div id="ammo-panel">
+    <span id="weapon-name">SIDEARM</span>
+    <div><span id="ammo-mag">12</span> / <span id="ammo-reserve">36</span></div>
+    <div id="reload-tag" style="display:none;">RELOADING&hellip;</div>
+    <div id="ability-bar">
+      <div class="ability-chip"><span class="k">Q</span>FLASH <span id="ability-flash-count">0</span></div>
+      <div class="ability-chip"><span class="k">E</span>SMOKE <span id="ability-smoke-count">0</span></div>
+    </div>
+  </div>
+
+  <div id="top-bar">
+    <span id="score-attacker">0</span><span class="score-sep">:</span><span id="score-defender">0</span>
+    <span id="phase-timer">0:20</span>
+    <span id="phase-label">BUY PHASE</span>
+  </div>
+
+  <div id="killfeed"></div>
+
+  <div id="minimap-wrap"><canvas id="minimap-canvas" width="180" height="180"></canvas></div>
+
+  <div id="interact-wrap">
+    <div id="interact-label">PLANTING SPIKE</div>
+    <div id="interact-track"><div id="interact-fill"></div></div>
+  </div>
+
+  <div id="damage-indicators"></div>
+  <div id="flash-overlay"></div>
+  <div id="phase-banner"></div>
+  <div id="spectate-banner">ELIMINATED — SPECTATING</div>
+
+  <div id="buy-menu">
+    <div id="buy-menu-panel">
+      <h2>BUY MENU</h2>
+      <div class="buy-sub">Available only during the buy phase</div>
+      <div id="buy-credits">$800</div>
+
+      <div class="buy-section-title">WEAPONS</div>
+      <div class="buy-grid" id="buy-weapon-list"></div>
+
+      <div class="buy-section-title">ARMOR</div>
+      <div class="buy-grid">
+        <button class="buy-row" id="buy-shield-light"><span class="buy-row-name">Light Shield (25)</span><span class="buy-row-price">$400</span></button>
+        <button class="buy-row" id="buy-shield-heavy"><span class="buy-row-name">Heavy Shield (50)</span><span class="buy-row-price">$1000</span></button>
+      </div>
+
+      <div class="buy-section-title">ABILITIES</div>
+      <div class="buy-grid">
+        <button class="buy-row" id="buy-ability-flash"><span class="buy-row-name">Flash Charge</span><span class="buy-row-price">0/2 &middot; $200</span></button>
+        <button class="buy-row" id="buy-ability-smoke"><span class="buy-row-name">Smoke Charge</span><span class="buy-row-price">0/2 &middot; $200</span></button>
+      </div>
+
+      <div class="buy-hint">1&ndash;4 select weapon &middot; Q flash &middot; E smoke &middot; F plant / defuse &middot; B close</div>
+    </div>
+  </div>
+
+  <div id="match-end-screen">
+    <div id="match-end-title">VICTORY</div>
+    <div id="match-end-score">0 &mdash; 0</div>
+    <button id="restart-btn">PLAY AGAIN</button>
+  </div>
+</div>
+
+<div id="mode-picker" aria-label="Game mode selector">
+  <button class="mode-btn active" data-mode="standard">Standard</button>
+  <button class="mode-btn" data-mode="spikeRush">Spike Rush</button>
+  <button class="mode-btn" data-mode="deathmatch">Deathmatch</button>
+  <button class="mode-btn" data-mode="practice">Practice</button>
+</div>
+
+<div id="crosshair-lock-hint">
+  <div class="hint-box">
+    <h1>BASTION QUARTER</h1>
+    <p>Click to lock the mouse and deploy</p>
+    <p><span class="kbd">WASD</span> Move &middot; <span class="kbd">Mouse</span> Look &middot; <span class="kbd">Shift</span> Walk &middot; <span class="kbd">Ctrl</span> Crouch &middot; <span class="kbd">Space</span> Jump</p>
+    <p><span class="kbd">Click</span> Fire &middot; <span class="kbd">Right-Click</span> ADS/Scope &middot; <span class="kbd">R</span> Reload &middot; <span class="kbd">1-4</span> Weapons</p>
+    <p><span class="kbd">Q</span> Flash &middot; <span class="kbd">E</span> Smoke &middot; <span class="kbd">F</span> Plant / Defuse &middot; <span class="kbd">B</span> Buy Menu</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="js/core/Utils.js"></script>
+<script src="js/core/Input.js"></script>
+<script src="js/core/AudioEngine.js"></script>
+<script src="js/core/AssetLoader.js"></script>
+<script src="js/world/MapData.js"></script>
+<script src="js/world/MapBuilder.js"></script>
+<script src="js/weapons/WeaponData.js"></script>
+<script src="js/weapons/WeaponSystem.js"></script>
+<script src="js/entities/Abilities.js"></script>
+<script src="js/entities/Player.js"></script>
+<script src="js/entities/Bot.js"></script>
+<script src="js/systems/Economy.js"></script>
+<script src="js/systems/RoundManager.js"></script>
+<script src="js/systems/HUD.js"></script>
+<script src="js/Game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
