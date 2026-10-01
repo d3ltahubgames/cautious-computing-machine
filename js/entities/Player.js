@@ -41,6 +41,9 @@ TFPS.Player = class Player {
     this.interactProgress = 0; // 0..1 exposed to RoundManager/HUD
 
     this.uiSpread = 0.01;
+    this.recoilPitch = 0;
+    this.recoilYaw = 0;
+    this.moveVelocity = new THREE.Vector3();
 
     this._buildHitbox();
     this._buildViewModel();
@@ -232,10 +235,16 @@ TFPS.Player = class Player {
 
     const move = new THREE.Vector3();
     if (mz !== 0 || mx !== 0) {
-      move.addScaledVector(forward, mz).addScaledVector(right, mx).normalize().multiplyScalar(speed * dt);
+      move.addScaledVector(forward, mz).addScaledVector(right, mx).normalize();
     }
-    const moving = move.lengthSq() > 0.00001;
-    TFPS.Utils.moveWithCollision(this.position, move.x, move.z, this.colliders, 0.38);
+    const accel = this.grounded ? 10.5 : 4.5;
+    const current = this.moveVelocity.clone();
+    const desired = move.multiplyScalar(speed);
+    this.moveVelocity.lerp(desired, TFPS.Utils.clamp(accel * dt, 0, 1));
+    if (move.lengthSq() < 0.0001) this.moveVelocity.multiplyScalar(Math.max(0, 1 - dt * 8));
+
+    const moving = this.moveVelocity.lengthSq() > 0.00001;
+    TFPS.Utils.moveWithCollision(this.position, this.moveVelocity.x * dt, this.moveVelocity.z * dt, this.colliders, 0.38);
 
     // Jump / gravity
     if (input.isDown('Space') && this.grounded && !this.interacting) {
@@ -259,6 +268,9 @@ TFPS.Player = class Player {
     } else {
       this.bobPhase *= 0.9;
     }
+
+    this.recoilPitch = TFPS.Utils.lerp(this.recoilPitch, 0, TFPS.Utils.clamp(dt * 10, 0, 1));
+    this.recoilYaw = TFPS.Utils.lerp(this.recoilYaw, 0, TFPS.Utils.clamp(dt * 8, 0, 1));
 
     this._syncCamera();
     this._updateViewModelAnim(dt, moving);
@@ -314,6 +326,10 @@ TFPS.Player = class Player {
     );
     this.audio.playGunshot(weaponDef.id);
     this._kick = 1;
+    const recoilStrength = 0.045 + (spread * 24);
+    this.recoilPitch += recoilStrength;
+    this.recoilYaw += (Math.random() - 0.5) * 0.025;
+    this.pitch = TFPS.Utils.clamp(this.pitch + recoilStrength * 0.65, -1.5, 1.5);
     this.bus.emit('shotFired', {
       shooter: this, origin, end: result.end, color: weaponDef.tracerColor, isPlayer: true,
     });
@@ -333,8 +349,8 @@ TFPS.Player = class Player {
 
   _syncCamera() {
     this.camera.rotation.order = 'YXZ';
-    this.camera.rotation.y = this.yaw;
-    this.camera.rotation.x = this.pitch;
+    this.camera.rotation.y = this.yaw + this.recoilYaw;
+    this.camera.rotation.x = this.pitch + this.recoilPitch;
     const eye = this.isCrouching ? EYE_CROUCH : EYE_STAND;
     this.camera.position.set(this.position.x, this.position.y + eye, this.position.z);
   }
